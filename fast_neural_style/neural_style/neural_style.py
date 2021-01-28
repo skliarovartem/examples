@@ -29,6 +29,7 @@ def check_paths(args):
 
 
 def train(args):
+    
     device = torch.device("cuda" if args.cuda else "cpu")
 
     np.random.seed(args.seed)
@@ -43,7 +44,7 @@ def train(args):
     train_dataset = datasets.ImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
 
-    transformer = TransformerNet().to(device)
+    transformer = TransformerNet(args.scale).to(device)
     optimizer = Adam(transformer.parameters(), args.lr)
     mse_loss = torch.nn.MSELoss()
 
@@ -111,7 +112,7 @@ def train(args):
 
     # save model
     transformer.eval().cpu()
-    save_model_filename = args.model + "_" + "{:.0e}".format(args.content_weight) + "_" + "{:.0e}".format(args.style_weight) + ".model"
+    save_model_filename = args.model + "_" + str(args.content_weight) + "_" + str(args.style_weight) + ".model"
     save_model_path = os.path.join(args.save_model_dir, save_model_filename)
     torch.save(transformer.state_dict(), save_model_path)
 
@@ -133,7 +134,7 @@ def stylize(args):
         output = stylize_onnx_caffe2(content_image, args)
     else:
         with torch.no_grad():
-            style_model = TransformerNet()
+            style_model = TransformerNet(args.scale)
             state_dict = torch.load(args.model)
             # remove saved deprecated running_* keys in InstanceNorm from the checkpoint
             for k in list(state_dict.keys()):
@@ -204,7 +205,8 @@ def main():
                                   help="number of images after which the training loss is logged, default is 500")
     train_arg_parser.add_argument("--checkpoint-interval", type=int, default=2000,
                                   help="number of batches after which a checkpoint of the trained model will be created")
-    train_arg_parser.add_argument("--model", type=str, default=None, help="model name")
+    train_arg_parser.add_argument("--model", type=str, default=None, help="model")
+    train_arg_parser.add_argument("--scale", type=int, default=1, help="scale of effect")
 
     eval_arg_parser = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
     eval_arg_parser.add_argument("--content-image", type=str, required=True,
