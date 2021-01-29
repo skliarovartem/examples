@@ -3,6 +3,7 @@ import torch
 
 class TransformerNet(torch.nn.Module):
     def __init__(self, scale):
+        print("transfromer scale: ", scale)
         super(TransformerNet, self).__init__()
         # Initial convolution layers
         self.conv1 = ConvLayer(3, 32*scale, kernel_size=9, stride=1)
