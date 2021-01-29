@@ -112,7 +112,7 @@ def train(args):
 
     # save model
     transformer.eval().cpu()
-    save_model_filename = args.model + "_" + str(args.content_weight) + "_" + str(args.style_weight) + ".model"
+    save_model_filename = args.model + "_" + "{:.0e}".format(args.content_weight) + "_" + "{:.0e}".format(args.style_weight) + ".model"
     save_model_path = os.path.join(args.save_model_dir, save_model_filename)
     torch.save(transformer.state_dict(), save_model_path)
 
